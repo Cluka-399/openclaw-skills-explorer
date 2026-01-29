@@ -235,6 +235,7 @@
           <div class="stat-label">New This Week</div>
         </div>
       </div>
+      <p class="last-updated" id="last-updated" style="color: var(--text-muted); font-size: 0.85rem;"></p>
     </header>
     
     <div class="search-box">
@@ -309,7 +310,17 @@
     async function fetchAllSkills() {
       try {
         const res = await fetch(SKILLS_JSON);
-        const items = await res.json();
+        const data = await res.json();
+        
+        // Handle both old format (array) and new format (object with skills array)
+        const items = Array.isArray(data) ? data : (data.skills || []);
+        
+        // Show last updated time
+        if (data.updatedAt) {
+          const updated = new Date(data.updatedAt);
+          const ago = getTimeAgo(updated);
+          document.getElementById('last-updated').textContent = `Last updated: ${ago}`;
+        }
         
         for (const item of items) {
           item.categories = categorizeSkill(item);
@@ -322,6 +333,17 @@
         console.error('Fetch error:', e);
         return [];
       }
+    }
+    
+    function getTimeAgo(date) {
+      const seconds = Math.floor((Date.now() - date) / 1000);
+      if (seconds < 60) return 'just now';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      return `${days}d ago`;
     }
     
     function copyInstall(skillSlug) {

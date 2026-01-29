@@ -1,0 +1,65 @@
+name: Update Skills Data
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Fetch all skills
+        run: |
+          # Fetch from multiple sort orders to maximize coverage
+          mkdir -p /tmp/skills
+          
+          for sort in newest downloads trending installs rating installsAllTime; do
+            echo "Fetching sort=$sort..."
+            npx clawdhub explore --json --limit 200 --sort $sort 2>/dev/null | tail -n +2 > /tmp/skills/$sort.json || true
+          done
+          
+          # Merge all skills
+          node << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+          
+          const allSkills = new Map();
+          const dir = '/tmp/skills';
+          
+          for (const file of fs.readdirSync(dir)) {
+            try {
+              const data = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf-8'));
+              for (const item of (data.items || [])) {
+                allSkills.set(item.slug, item);
+              }
+            } catch (e) {
+              console.error(`Error reading ${file}:`, e.message);
+            }
+          }
+          
+          const skills = Array.from(allSkills.values());
+          const output = {
+            skills: skills,
+            updatedAt: new Date().toISOString(),
+            count: skills.length
+          };
+          
+          fs.writeFileSync('skills.json', JSON.stringify(output));
+          console.log(`Saved ${skills.length} skills`);
+          EOF
+      
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add skills.json
+          git diff --staged --quiet || git commit -m "Update skills data ($(date -u +%Y-%m-%d\ %H:%M) UTC)"
+          git push

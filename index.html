@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clawdhub Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg: #0f0f10;
+      --bg-card: #1a1a1d;
+      --bg-hover: #252528;
+      --border: #2a2a2e;
+      --text: #e4e4e7;
+      --text-muted: #71717a;
+      --accent: #8b5cf6;
+      --accent-hover: #a78bfa;
+      --green: #22c55e;
+      --blue: #3b82f6;
+      --orange: #f97316;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    
+    header { text-align: center; margin-bottom: 3rem; }
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+    
+    .stats-bar { display: flex; justify-content: center; gap: 2rem; margin: 1.5rem 0; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .search-box { max-width: 600px; margin: 0 auto 2rem; position: relative; }
+    .search-input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg-card);
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); }
+    .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center; }
+    .tab {
+      padding: 0.6rem 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .tab:hover { background: var(--bg-hover); color: var(--text); }
+    .tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+    
+    .categories { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 2rem; }
+    .category-tag {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .category-tag:hover, .category-tag.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .category-count { opacity: 0.7; margin-left: 0.3rem; }
+    
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+    
+    .skill-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .skill-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    
+    .skill-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+    .skill-name { font-size: 1.1rem; font-weight: 600; }
+    .skill-badges { display: flex; gap: 0.4rem; }
+    .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+    .badge-new { background: var(--green); color: black; }
+    .badge-updated { background: var(--blue); color: white; }
+    
+    .skill-summary {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .skill-stats { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+    .skill-stat { display: flex; align-items: center; gap: 0.3rem; }
+    
+    .skill-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.75rem; }
+    .skill-categories { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .skill-cat { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; background: var(--bg-hover); color: var(--text-muted); }
+    
+    .copy-btn {
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { background: var(--accent); border-color: var(--accent); }
+    
+    .starter-packs { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 3rem; }
+    .pack-card {
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-hover));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pack-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .pack-name { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .pack-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+    .pack-skills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .pack-skill {
+      padding: 0.3rem 0.6rem;
+      background: var(--bg);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .pack-skill:hover { background: var(--accent); color: white; }
+    .copy-icon { opacity: 0.5; font-size: 0.7rem; margin-left: 0.2rem; }
+    .pack-skill:hover .copy-icon { opacity: 1; }
+    
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: black;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      z-index: 1000;
+      animation: fadeInOut 2s ease-in-out forwards;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    }
+    
+    .empty-state, .loading { text-align: center; padding: 4rem; color: var(--text-muted); }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    
+    @media (max-width: 640px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 1.75rem; }
+      .stats-bar { gap: 1rem; }
+      .skills-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🦞 Clawdhub Explorer</h1>
+      <p class="subtitle">Discover the perfect skills for your Moltbot</p>
+      <div class="stats-bar">
+        <div class="stat">
+          <div class="stat-value" id="total-skills">-</div>
+          <div class="stat-label">Skills</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="total-categories">-</div>
+          <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="new-this-week">-</div>
+          <div class="stat-label">New This Week</div>
+        </div>
+      </div>
+    </header>
+    
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" placeholder="Search skills..." id="search">
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" data-tab="all">All Skills</button>
+      <button class="tab" data-tab="trending">🔥 Trending</button>
+      <button class="tab" data-tab="new">✨ New</button>
+      <button class="tab" data-tab="updated">🔄 Updated</button>
+      <button class="tab" data-tab="packs">📦 Starter Packs</button>
+    </div>
+    
+    <div class="categories" id="categories"></div>
+    
+    <div id="content">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 1rem;">Loading skills from Clawdhub...</p>
+      </div>
+    </div>
+    
+    <footer>
+      Built with 🦞 by <a href="https://github.com/dannyshmueli">Cluka</a> • 
+      Data from <a href="https://clawdhub.com">Clawdhub</a>
+    </footer>
+  </div>
+  
+  <script>
+    const API_BASE = 'https://clawdhub.com/api/v1/skills';
+    
+    const CATEGORIES = {
+      'Productivity': ['calendar', 'email', 'gmail', 'task', 'todo', 'reminder', 'note', 'document', 'pdf', 'spreadsheet'],
+      'Development': ['git', 'github', 'code', 'debug', 'deploy', 'docker', 'api', 'database', 'sql', 'programming'],
+      'Communication': ['slack', 'discord', 'telegram', 'whatsapp', 'message', 'chat', 'sms', 'call'],
+      'Media': ['music', 'spotify', 'youtube', 'video', 'audio', 'podcast', 'image', 'photo', 'tts', 'speech'],
+      'Smart Home': ['home', 'light', 'sonos', 'hue', 'thermostat', 'iot', 'sensor', 'camera', 'security'],
+      'Finance': ['finance', 'stock', 'crypto', 'bitcoin', 'bank', 'money', 'budget', 'invoice', 'payment'],
+      'Travel': ['flight', 'travel', 'hotel', 'weather', 'map', 'location', 'uber', 'lyft'],
+      'AI & Automation': ['ai', 'gpt', 'llm', 'automation', 'workflow', 'agent', 'scrape', 'browser'],
+      'Social': ['twitter', 'x.com', 'reddit', 'linkedin', 'social', 'post', 'feed'],
+      'Utilities': ['file', 'search', 'convert', 'compress', 'backup', 'sync', 'clipboard']
+    };
+    
+    const STARTER_PACKS = {
+      'essentials': { name: '🎯 Essentials', description: 'Must-have skills for every Moltbot user', skills: ['weather', 'summarize', 'web-search', 'remind-me'] },
+      'developer': { name: '👨‍💻 Developer Pack', description: 'Tools for coding and dev workflows', skills: ['coding-agent', 'github-pat', 'git', 'docker'] },
+      'productivity': { name: '📊 Productivity Pack', description: 'Get organized and stay on top of things', skills: ['gog', 'caldav-calendar', 'summarize', 'remind-me'] },
+      'smart-home': { name: '🏠 Smart Home Pack', description: 'Control your connected home', skills: ['sonoscli', 'hue', 'home-assistant'] },
+      'content-creator': { name: '🎨 Content Creator', description: 'Create and share content', skills: ['elevenlabs-tts', 'nano-banana-pro', 'youtube-watcher'] }
+    };
+    
+    let allSkills = [];
+    let categories = {};
+    let currentTab = 'all';
+    let currentCategory = null;
+    let searchTerm = '';
+    
+    function categorizeSkill(skill) {
+      const text = `${skill.displayName || ''} ${skill.summary || ''} ${skill.slug}`.toLowerCase();
+      const matched = [];
+      for (const [category, keywords] of Object.entries(CATEGORIES)) {
+        for (const keyword of keywords) {
+          if (text.includes(keyword)) { matched.push(category); break; }
+        }
+      }
+      return matched.length > 0 ? matched : ['Other'];
+    }
+    
+    async function fetchAllSkills() {
+      const skills = new Map();
+      let cursor = null;
+      let pages = 0;
+      const maxPages = 10;
+      
+      while (pages < maxPages) {
+        const url = cursor ? `${API_BASE}?limit=200&cursor=${cursor}` : `${API_BASE}?limit=200`;
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          
+          for (const item of (data.items || [])) {
+            item.categories = categorizeSkill(item);
+            item.isNew = (Date.now() - item.createdAt) < 7 * 24 * 60 * 60 * 1000;
+            item.isUpdated = (Date.now() - item.updatedAt) < 3 * 24 * 60 * 60 * 1000;
+            skills.set(item.slug, item);
+          }
+          
+          cursor = data.nextCursor;
+          if (!cursor) break;
+          pages++;
+        } catch (e) {
+          console.error('Fetch error:', e);
+          break;
+        }
+      }
+      
+      return Array.from(skills.values());
+    }
+    
+    function copyInstall(skillSlug) {
+      const cmd = `Please install the ${skillSlug} skill`;
+      navigator.clipboard.writeText(cmd).then(() => showToast(`Copied: ${cmd}`)).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = cmd;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast(`Copied: ${cmd}`);
+      });
+    }
+    
+    function showToast(message) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+    
+    async function init() {
+      allSkills = await fetchAllSkills();
+      
+      // Build category counts
+      for (const skill of allSkills) {
+        for (const cat of skill.categories) {
+          categories[cat] = (categories[cat] || 0) + 1;
+        }
+      }
+      
+      document.getElementById('total-skills').textContent = allSkills.length;
+      document.getElementById('total-categories').textContent = Object.keys(categories).length;
+      document.getElementById('new-this-week').textContent = allSkills.filter(s => s.isNew).length;
+      
+      renderCategories();
+      renderSkills();
+    }
+    
+    function renderCategories() {
+      const container = document.getElementById('categories');
+      const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
+      container.innerHTML = sorted.map(([cat, count]) => `
+        <span class="category-tag ${currentCategory === cat ? 'active' : ''}" data-cat="${cat}">
+          ${cat}<span class="category-count">${count}</span>
+        </span>
+      `).join('');
+      container.querySelectorAll('.category-tag').forEach(el => {
+        el.addEventListener('click', () => {
+          currentCategory = currentCategory === el.dataset.cat ? null : el.dataset.cat;
+          renderCategories();
+          renderSkills();
+        });
+      });
+    }
+    
+    function renderSkills() {
+      const content = document.getElementById('content');
+      
+      if (currentTab === 'packs') { renderStarterPacks(); return; }
+      
+      let skills = [...allSkills];
+      
+      if (currentTab === 'trending') {
+        skills = skills.sort((a, b) => (b.stats?.installsCurrent || 0) - (a.stats?.installsCurrent || 0)).slice(0, 30);
+      } else if (currentTab === 'new') {
+        skills = skills.filter(s => s.isNew).sort((a, b) => b.createdAt - a.createdAt);
+      } else if (currentTab === 'updated') {
+        skills = skills.filter(s => s.isUpdated && !s.isNew).sort((a, b) => b.updatedAt - a.updatedAt);
+      }
+      
+      if (currentCategory) skills = skills.filter(s => s.categories.includes(currentCategory));
+      
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        skills = skills.filter(s => 
+          (s.displayName || '').toLowerCase().includes(term) ||
+          s.slug.toLowerCase().includes(term) ||
+          (s.summary || '').toLowerCase().includes(term)
+        );
+      }
+      
+      if (skills.length === 0) { content.innerHTML = '<div class="empty-state">No skills found</div>'; return; }
+      
+      content.innerHTML = `<div class="skills-grid">${skills.map(skill => `
+        <div class="skill-card" onclick="window.open('https://clawdhub.com/skills/${skill.slug}', '_blank')">
+          <div class="skill-header">
+            <span class="skill-name">${skill.displayName || skill.slug}</span>
+            <div class="skill-badges">
+              ${skill.isNew ? '<span class="badge badge-new">New</span>' : ''}
+              ${skill.isUpdated && !skill.isNew ? '<span class="badge badge-updated">Updated</span>' : ''}
+            </div>
+          </div>
+          <p class="skill-summary">${skill.summary || 'No description'}</p>
+          <div class="skill-stats">
+            <span class="skill-stat">📥 ${skill.stats?.downloads || 0}</span>
+            <span class="skill-stat">⭐ ${skill.stats?.stars || 0}</span>
+            <span class="skill-stat">📦 ${skill.stats?.installsCurrent || 0}</span>
+          </div>
+          <div class="skill-footer">
+            <div class="skill-categories">${skill.categories.map(c => `<span class="skill-cat">${c}</span>`).join('')}</div>
+            <button class="copy-btn" onclick="event.stopPropagation(); copyInstall('${skill.slug}')" title="Copy install command">📋</button>
+          </div>
+        </div>
+      `).join('')}</div>`;
+    }
+    
+    function renderStarterPacks() {
+      const content = document.getElementById('content');
+      content.innerHTML = `
+        <div class="starter-packs">
+          ${Object.entries(STARTER_PACKS).map(([key, pack]) => `
+            <div class="pack-card">
+              <div class="pack-name">${pack.name}</div>
+              <p class="pack-desc">${pack.description}</p>
+              <div class="pack-skills">
+                ${pack.skills.map(s => `<span class="pack-skill" onclick="copyInstall('${s}')" title="Click to copy">${s} <span class="copy-icon">📋</span></span>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <h2 style="margin: 2rem 0 1rem; text-align: center; color: var(--text);">All Skills</h2>
+        <div class="skills-grid">${allSkills.slice(0, 50).map(skill => `
+          <div class="skill-card" onclick="window.open('https://clawdhub.com/skills/${skill.slug}', '_blank')">
+            <div class="skill-header">
+              <span class="skill-name">${skill.displayName || skill.slug}</span>
+              <div class="skill-badges">${skill.isNew ? '<span class="badge badge-new">New</span>' : ''}</div>
+            </div>
+            <p class="skill-summary">${skill.summary || 'No description'}</p>
+            <div class="skill-stats">
+              <span class="skill-stat">📥 ${skill.stats?.downloads || 0}</span>
+              <span class="skill-stat">⭐ ${skill.stats?.stars || 0}</span>
+            </div>
+            <div class="skill-footer">
+              <div></div>
+              <button class="copy-btn" onclick="event.stopPropagation(); copyInstall('${skill.slug}')" title="Copy install command">📋</button>
+            </div>
+          </div>
+        `).join('')}</div>
+      `;
+    }
+    
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentTab = tab.dataset.tab;
+        currentCategory = null;
+        renderCategories();
+        renderSkills();
+      });
+    });
+    
+    document.getElementById('search').addEventListener('input', (e) => {
+      searchTerm = e.target.value;
+      renderSkills();
+    });
+    
+    init();
+  </script>
+</body>
+</html>

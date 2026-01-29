@@ -266,7 +266,7 @@
   </div>
   
   <script>
-    const API_BASE = 'https://clawdhub.com/api/v1/skills';
+    const SKILLS_JSON = 'skills.json';
     
     const CATEGORIES = {
       'Productivity': ['calendar', 'email', 'gmail', 'task', 'todo', 'reminder', 'note', 'document', 'pdf', 'spreadsheet'],
@@ -307,34 +307,21 @@
     }
     
     async function fetchAllSkills() {
-      const skills = new Map();
-      let cursor = null;
-      let pages = 0;
-      const maxPages = 10;
-      
-      while (pages < maxPages) {
-        const url = cursor ? `${API_BASE}?limit=200&cursor=${cursor}` : `${API_BASE}?limit=200`;
-        try {
-          const res = await fetch(url);
-          const data = await res.json();
-          
-          for (const item of (data.items || [])) {
-            item.categories = categorizeSkill(item);
-            item.isNew = (Date.now() - item.createdAt) < 7 * 24 * 60 * 60 * 1000;
-            item.isUpdated = (Date.now() - item.updatedAt) < 3 * 24 * 60 * 60 * 1000;
-            skills.set(item.slug, item);
-          }
-          
-          cursor = data.nextCursor;
-          if (!cursor) break;
-          pages++;
-        } catch (e) {
-          console.error('Fetch error:', e);
-          break;
+      try {
+        const res = await fetch(SKILLS_JSON);
+        const items = await res.json();
+        
+        for (const item of items) {
+          item.categories = categorizeSkill(item);
+          item.isNew = (Date.now() - item.createdAt) < 7 * 24 * 60 * 60 * 1000;
+          item.isUpdated = (Date.now() - item.updatedAt) < 3 * 24 * 60 * 60 * 1000;
         }
+        
+        return items;
+      } catch (e) {
+        console.error('Fetch error:', e);
+        return [];
       }
-      
-      return Array.from(skills.values());
     }
     
     function copyInstall(skillSlug) {

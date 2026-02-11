@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clawdhub Explorer</title>
+  <title>OpenClaw Skills Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -219,8 +219,8 @@
 <body>
   <div class="container">
     <header>
-      <h1>🦞 Clawdhub Explorer</h1>
-      <p class="subtitle">Discover the perfect skills for your Moltbot</p>
+      <h1>🦞 OpenClaw Skills Explorer</h1>
+      <p class="subtitle">Discover the perfect skills for your OpenClaw agent</p>
       <div class="stats-bar">
         <div class="stat">
           <div class="stat-value" id="total-skills">-</div>
@@ -256,13 +256,13 @@
     <div id="content">
       <div class="loading">
         <div class="spinner"></div>
-        <p style="margin-top: 1rem;">Loading skills from Clawdhub...</p>
+        <p style="margin-top: 1rem;">Loading skills...</p>
       </div>
     </div>
     
     <footer>
       Built with 🦞 by <a href="https://github.com/dannyshmueli">Cluka</a> • 
-      Data from <a href="https://clawdhub.com">Clawdhub</a>
+      Data from <a href="https://clawhub.com">OpenClaw Skills</a>
     </footer>
   </div>
   
@@ -433,7 +433,7 @@
       if (skills.length === 0) { content.innerHTML = '<div class="empty-state">No skills found</div>'; return; }
       
       content.innerHTML = `<div class="skills-grid">${skills.map(skill => `
-        <div class="skill-card" onclick="window.open('https://clawdhub.com/skills/${skill.slug}', '_blank')">
+        <div class="skill-card" onclick="window.open('https://clawhub.com/skills/${skill.slug}', '_blank')">
           <div class="skill-header">
             <span class="skill-name">${skill.displayName || skill.slug}</span>
             <div class="skill-badges">
@@ -471,7 +471,7 @@
         </div>
         <h2 style="margin: 2rem 0 1rem; text-align: center; color: var(--text);">All Skills</h2>
         <div class="skills-grid">${allSkills.slice(0, 50).map(skill => `
-          <div class="skill-card" onclick="window.open('https://clawdhub.com/skills/${skill.slug}', '_blank')">
+          <div class="skill-card" onclick="window.open('https://clawhub.com/skills/${skill.slug}', '_blank')">
             <div class="skill-header">
               <span class="skill-name">${skill.displayName || skill.slug}</span>
               <div class="skill-badges">${skill.isNew ? '<span class="badge badge-new">New</span>' : ''}</div>

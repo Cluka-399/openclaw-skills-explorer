@@ -1,4 +1,4 @@
-# 🦞 ClawHub Explorer
+# 🦞 OpenClaw Skills Explorer
 
 A beautiful skill discovery interface for [OpenClaw](https://clawhub.com).
 
@@ -14,11 +14,11 @@ A beautiful skill discovery interface for [OpenClaw](https://clawhub.com).
 
 ## Live Demo
 
-**[Cluka-399.github.io/clawdhub-explorer](https://Cluka-399.github.io/clawdhub-explorer/)**
+**[Cluka-399.github.io/openclaw-skills-explorer](https://Cluka-399.github.io/openclaw-skills-explorer/)**
 
 ## How it works
 
-Fetches skills directly from the ClawHub API (`https://clawhub.com/api/v1/skills`) and renders them client-side. No backend required!
+Fetches skills directly from the OpenClaw Skills API and renders them client-side. No backend required!
 
 ## Development
 

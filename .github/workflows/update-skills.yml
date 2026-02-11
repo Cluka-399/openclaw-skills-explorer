@@ -5,6 +5,9 @@ on:
     - cron: '0 * * * *'  # Every hour
   workflow_dispatch:  # Manual trigger
 
+permissions:
+  contents: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -23,7 +26,7 @@ jobs:
           
           for sort in newest downloads trending installs rating installsAllTime; do
             echo "Fetching sort=$sort..."
-            npx clawdhub explore --json --limit 200 --sort $sort 2>/dev/null | tail -n +2 > /tmp/skills/$sort.json || true
+            npx clawdhub explore --json --limit 200 --sort $sort --registry "https://clawhub.ai" 2>/dev/null | grep -v '^-' > /tmp/skills/$sort.json || true
           done
           
           # Merge all skills
@@ -36,7 +39,9 @@ jobs:
           
           for (const file of fs.readdirSync(dir)) {
             try {
-              const data = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf-8'));
+              const raw = fs.readFileSync(path.join(dir, file), 'utf-8').trim();
+              if (!raw) continue;
+              const data = JSON.parse(raw);
               for (const item of (data.items || [])) {
                 allSkills.set(item.slug, item);
               }

@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: '20'
       
+      - name: Install ClawHub CLI
+        run: npm install -g clawhub@latest
+
       - name: Fetch all skills
         run: |
           # Fetch from multiple sort orders to maximize coverage
@@ -26,7 +29,7 @@ jobs:
           
           for sort in newest downloads trending installs rating installsAllTime; do
             echo "Fetching sort=$sort..."
-            npx clawdhub explore --json --limit 200 --sort $sort --registry "https://clawhub.ai" 2>/dev/null | grep -v '^-' > /tmp/skills/$sort.json || true
+            clawhub explore --json --limit 200 --sort $sort --registry "https://clawhub.ai" 2>&1 | grep -v '^- ' > /tmp/skills/$sort.json || true
           done
           
           # Merge all skills

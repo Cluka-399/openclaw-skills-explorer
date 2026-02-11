@@ -1,6 +1,6 @@
-# 🦞 Clawdhub Explorer
+# 🦞 ClawHub Explorer
 
-A beautiful skill discovery interface for [Moltbot/Clawdbot](https://clawdhub.com).
+A beautiful skill discovery interface for [OpenClaw](https://clawhub.com).
 
 ## Features
 
@@ -14,11 +14,11 @@ A beautiful skill discovery interface for [Moltbot/Clawdbot](https://clawdhub.co
 
 ## Live Demo
 
-**[clawdhub-explorer.github.io](https://dannyshmueli.github.io/clawdhub-explorer/)**
+**[Cluka-399.github.io/clawdhub-explorer](https://Cluka-399.github.io/clawdhub-explorer/)**
 
 ## How it works
 
-Fetches skills directly from the Clawdhub API (`https://clawdhub.com/api/v1/skills`) and renders them client-side. No backend required!
+Fetches skills directly from the ClawHub API (`https://clawhub.com/api/v1/skills`) and renders them client-side. No backend required!
 
 ## Development
 

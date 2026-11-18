@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       
       - name: Install ClawHub CLI
         run: npm install -g clawhub@latest
@@ -69,5 +69,24 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add skills.json
-          git diff --staged --quiet || git commit -m "Update skills data ($(date -u +%Y-%m-%d\ %H:%M) UTC)"
-          git push
+
+          if git diff --staged --quiet; then
+            echo "No skills data changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Update skills data ($(date -u +%Y-%m-%d\ %H:%M) UTC)"
+
+          # GitHub occasionally rejects a valid push with a transient
+          # "fatal error in commit_refs". Retry the same commit before failing.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              sleep $((attempt * 5))
+            fi
+          done
+
+          echo "git push failed after 3 attempts" >&2
+          exit 1
